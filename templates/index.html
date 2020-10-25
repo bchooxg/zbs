@@ -5,5 +5,16 @@
 {% endblock %}
 
 {% block body %}
-helo
+<div class="container">
+    <h1>Input New Channel Name</h1>
+    <form action="/" method='POST'>
+        <input type="text" name="c_name" placeholder="Channel Name">
+        <button type="submit">SUBMIT</button>
+    </form>
+
+    {% for channel in channels %}
+    <h1>{{ channel.name }}</h1>
+    <a href="#">Delete</a>
+    {% endfor %}
+</div>
 {% endblock %}

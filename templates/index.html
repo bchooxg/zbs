@@ -5,6 +5,20 @@
 {% endblock %}
 
 {% block body %}
+
+{% for mess in get_flashed_messages() %}
+
+<div class="container alert alert-warning alert-dismissible fade show" role="alert">
+    <strong>Holy guacamole!</strong> {{ mess }}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+
+</div>
+
+{% endfor %}
+
+
 <div class="container">
     <h1>Input New Channel Name</h1>
     <form action="{{ url_for('create_channel') }}" method='POST'>

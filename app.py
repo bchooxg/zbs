@@ -1,8 +1,10 @@
-from flask import Flask, render_template, url_for, request, redirect
+from flask import Flask, render_template, url_for, request, redirect, flash, session
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
+
+app.config['SECRET_KEY'] = 'secret'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -40,7 +42,8 @@ def create_channel():
         db.session.add(new_channel)
         db.session.commit()
         print('Channel Added')
-        return redirect('/')
+        flash("Channel Created")
+        return redirect(url_for('index'))
 
     except:
         return "There was an issue adding your task "
@@ -52,7 +55,7 @@ def delete_channel(id):
     if channel is not None :
         db.session.delete(channel)
         db.session.commit()
-        print('Channel Deleted')
+        flash('Channel Deleted')
         return redirect('/')
     else:
         print('Channel Not Found')

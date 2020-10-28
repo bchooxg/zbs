@@ -1,5 +1,9 @@
 from flask import Flask, render_template, url_for, request, redirect, flash, session
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField, PasswordField
+
 
 app = Flask(__name__)
 
@@ -10,17 +14,55 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+Migrate(app,db)
+
+class CreateAdminForm(FlaskForm):
+    name = StringField("Whats your preferred name")
+    username = StringField("Desired Username?")
+    password = PasswordField('Desired Password?')
+    submit = SubmitField('Submit')
+
 class Channel(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     name = db.Column(db.String(50))
 
+    def __init__(self, name):
+        self.name = name
+
     def __repr__(self):
         return '<Task %r>'% self.id
+
+class Admin(db.Model):
+    id = db.Column(db.Integer,primary_key=True)
+    name = db.Column(db.String(50))
+    username = db.Column(db.String(50))
+
 
 @app.route('/', methods=['POST','GET'])
 def index():
     channels = Channel.query.all()
     return render_template('index.html', channels=channels)
+
+# LOGIN ROUTES
+
+@app.route('/login', methods=["POST","GET"])
+def login():
+    return render_template('login.html')  
+
+@app.route('/admin_login', methods=["POST","GET"])
+def admin_login():
+    form = CreateAdminForm()
+
+    if form.validate_on_submit():
+        print(form.name.data)
+        print(form.username.data)
+        print(form.password.data)
+
+
+    return render_template('admin_login.html',form=form)    
+
+
+# CHANNEL ROUTES
 
 @app.route('/channel/<int:id>')
 def channel(id):
@@ -42,7 +84,7 @@ def create_channel():
         db.session.add(new_channel)
         db.session.commit()
         print('Channel Added')
-        flash("Channel Created")
+        flash("Channel Created","success")
         return redirect(url_for('index'))
 
     except:
@@ -55,22 +97,13 @@ def delete_channel(id):
     if channel is not None :
         db.session.delete(channel)
         db.session.commit()
-        flash('Channel Deleted')
+        flash('Channel Deleted',"danger")
         return redirect('/')
     else:
         print('Channel Not Found')
         return redirect('/')
 
-
-
     new_channel = Channel(name=channel_name)
-
-
-
-@app.route('/login')
-def login():
-    return render_template('login.html')    
-
 
 if __name__ == "__main__":
     app.run(debug=True)

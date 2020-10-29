@@ -35,9 +35,16 @@
 <div class="container">
 
     <h1>Input New Channel Name</h1>
-    <form action="{{ url_for('create_channel') }}" method='POST'>
+    <!-- <form action="{{ url_for('create_channel') }}" method='POST'>
         <input required type="text" name="c_name" placeholder="Channel Name">
         <button type="submit">SUBMIT</button>
+    </form> -->
+
+    <form action="{{ url_for('create_channel') }}" method="POST">
+        {{ create_channel_form.hidden_tag() }}
+        {{ create_channel_form.name.label }}{{ create_channel_form.name() }}
+        {{ create_channel_form.date.label }}{{ create_channel_form.date() }}
+        {{ create_channel_form.submit() }}
     </form>
 
     {% for channel in channels %}

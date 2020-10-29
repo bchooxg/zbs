@@ -6,6 +6,34 @@
 
 {% block body %}
 <div class="container">
-    <h1>{{ channel.name }}</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    <!-- Categories: success (green), info (blue), warning (yellow), danger (red) -->
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="container alert alert-{{ category }} alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <!-- <strong>Title</strong> --> {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <h1>Channel Name : {{ channel.name }}</h1>
+    <h3>Start Date : {{ channel.start_date }}</h3>
+
+    <ul>
+        {% for slot in channel.slots %}
+        <li>{{ slot }}</li>
+        {% endfor %}
+    </ul>
+
+    <form method="POST">
+        {{ form.csrf_token }}
+        {{ form.channel_id(value=channel.id) }}
+        {{ form.start_time.label }}{{ form.start_time() }}
+        {{ form.end_time.label }}{{ form.end_time() }}
+        {{ form.submit() }}
+    </form>
 </div>
 {% endblock %}

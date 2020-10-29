@@ -22,11 +22,33 @@
     <h1>Channel Name : {{ channel.name }}</h1>
     <h3>Start Date : {{ channel.start_date }}</h3>
 
-    <ul>
-        {% for slot in channel.slots %}
-        <li>{{ slot }}</li>
-        {% endfor %}
-    </ul>
+ 
+
+    <table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">Slot ID</th>
+            <th scope="col">Start Time (hrs)</th>
+            <th scope="col">End Time (hrs)</th>
+            <th scope="col">Edit</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          {% for slot in channel.slots %}
+          <tr>
+            <th scope="row">{{ slot.id }}</th>
+            <td>
+                <input type="text" id="disabledTextInput" class="form-control col-7" value={{ slot.start_time }} disabled>
+            </td>
+            <td>
+                <input type="text" id="disabledTextInput" class="form-control col-7" value={{ slot.end_time }} disabled>
+            </td>            <td><button>Edit</button></td>
+          </tr>
+          {% endfor %}
+
+        </tbody>
+      </table>
 
     <form method="POST">
         {{ form.csrf_token }}

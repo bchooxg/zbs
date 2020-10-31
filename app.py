@@ -1,12 +1,12 @@
 from flask import Flask, render_template, url_for, request, redirect, flash, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField, HiddenField
-from wtforms.validators import Required
-from wtforms.fields.html5 import DateField
+from flask_login import LoginManager, UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
 
+from forms import RegistrationForm, CreateChannelForm, CreateSlotForm
 
+login_manager = LoginManager()
 
 app = Flask(__name__)
 
@@ -16,27 +16,13 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-
 Migrate(app,db)
 
-class CreateAdminForm(FlaskForm):
-    name = StringField("Whats your preferred name")
-    username = StringField("Desired Username?")
-    password = PasswordField('Desired Password?')
-    submit = SubmitField('Submit')
-
-class CreateChannelForm(FlaskForm):
-    name = StringField('Desired Channel Name')
-    date = DateField('Channel Start Date', format='%Y-%m-%d')
-    submit = SubmitField('Submit')
-
-class CreateSlotForm(FlaskForm):
-    channel_id = HiddenField()
-    start_time = StringField("Start Time")
-    end_time = StringField('End Time')
-    submit = SubmitField('Submit')
+login_manager.init_app(app)
+login_manager.login_view = "login"
 
 
+# DATABASES
 class Channel(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     name = db.Column(db.String(50))
@@ -64,11 +50,26 @@ class Slot(db.Model):
     def __repr__(self):
         return f"{self.start_time}hrs - {self.end_time}hrs"
 
-
-class Admin(db.Model):
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id)
+    
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer,primary_key=True)
-    name = db.Column(db.String(50))
-    username = db.Column(db.String(50))
+    name = db.Column(db.String(64))
+    username = db.Column(db.String(64),unique=True)
+    hashed_pass =db.Column(db.String(128))
+    isStaff = db.Column(db.Boolean)
+    isStudent = db.Column(db.Boolean)
+    isAdmin = db.Column(db.Boolean)
+
+    def __init__(self,name,username,password):
+        self.name = name
+        self.username = username
+        self.hashed_pass = generate_password_hash(password)
+    
+    def check_password(self,password):
+        return check_password_hash(self.hashed_pass,password)
 
 
 @app.route('/', methods=['POST','GET'])
@@ -84,17 +85,51 @@ def index():
 def login():
     return render_template('login.html')  
 
-@app.route('/admin_login', methods=["POST","GET"])
-def admin_login():
-    form = CreateAdminForm()
+@app.route('/register', methods=["POST","GET"])
+def register():
 
-    if form.validate_on_submit():
-        print(form.name.data)
-        print(form.username.data)
-        print(form.password.data)
+    form = RegistrationForm()
+
+    return render_template('register.html',form=form)
 
 
-    return render_template('admin_login.html',form=form)    
+
+# SLOT ROUTES
+
+@app.route('/slot/update',methods=['POST']) 
+def slot_update():
+
+    slot_id = request.form['slot_id']
+    start_time = request.form['start_time']
+    end_time = request.form['end_time']
+
+    slot = Slot.query.filter_by(id=slot_id).first()
+
+    if slot is not None :
+        slot.start_time = start_time
+        slot.end_time = end_time
+        db.session.commit()
+        flash('Slot Updated',"success")
+        return redirect(url_for("channel",id=slot.channel_id))
+    else:
+        print('Slot Not Found')
+        return redirect('/')
+
+@app.route('/slot/delete/<int:id>',methods=['POST'])
+def slot_delete(id):
+
+    slot = Slot.query.filter_by(id=id).first()
+
+    if slot is not None :
+        channel = slot.channel_id
+        db.session.delete(slot)
+        db.session.commit()
+        flash('Slot Deleted',"danger")
+        return redirect(url_for('channel',id=channel))
+    else:
+        flash('Error Deleting Slot',"danger")
+        return redirect(url_for('index'))
+
 
 
 # CHANNEL ROUTES

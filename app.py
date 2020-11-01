@@ -17,7 +17,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-Migrate(app,db)
+Migrate(app,db,render_as_batch=True)
 
 login_manager.init_app(app)
 login_manager.login_view = "login"
@@ -63,6 +63,8 @@ class User(db.Model, UserMixin):
     hashed_pass =db.Column(db.String(128))
     type = db.Column(db.Integer())
     bookings = db.relationship('Booking', backref='user',lazy='dynamic')
+    last_logged_in = db.Column(db.DateTime)
+    last_logged_out = db.Column(db.DateTime)
 
 
     def __init__(self,name,username,password,type):
@@ -97,7 +99,14 @@ def index():
     channels = Channel.query.all()
     return render_template('index.html', channels=channels, create_channel_form=create_channel_form)
 
-# LOGIN ROUTES
+# USER ROUTES
+
+@app.route('/users')
+def users():
+
+    users = User.query.all()
+
+    return render_template('users.html',users = users)
 
 @app.route('/login', methods=["POST","GET"])
 def login():
@@ -109,6 +118,10 @@ def login():
 
         if user.check_password(form.password.data) and user is not None :
             login_user(user)
+            # Set last logged in date and time
+            user.last_logged_in = datetime.now()
+            db.session.commit()
+
             flash("Logged In Successfully","success")
 
             next = request.args.get('next')
@@ -143,7 +156,12 @@ def register():
 @app.route('/logout')
 @login_required
 def logout():
+    user = User.query.filter_by(id = current_user.id).first()
+    user.last_logged_out = datetime.now()
+    db.session.commit()
+
     logout_user()
+
     flash('You have been logged out','info')
     return redirect(url_for('index'))
 

@@ -13,10 +13,14 @@
   <form method="POST">
     {{ form.hidden_tag() }}
     {{ form.name.label }}{{ form.name() }}
+    <br>
     {{ form.username.label }}{{ form.username() }}
+    <br>
     {{ form.password.label }}{{ form.password() }}
+    <br>
     {{ form.confirm_password.label }}{{ form.confirm_password() }}
-    {{ form.type }}
+    <br>
+    {{ form.type.label }}{{ form.type }}
     {{ form.submit() }}
 </form>
 

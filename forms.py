@@ -18,7 +18,7 @@ class RegistrationForm(FlaskForm):
     username = StringField("Desired Username?",validators=[DataRequired()])
     password = PasswordField('Desired Password?',validators=[DataRequired(),EqualTo('confirm_password', message='Passwords must match')])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired()])
-    type = RadioField('User Type', choices=[(0,"User Administrator"),(1,"Staff User"),(2,"Student User")])
+    type = RadioField('User Type', choices=[(0,"User Administrator"),(1,"Staff User"),(2,"Student User")], validators=[DataRequired()])
     submit = SubmitField('Register')
 
     def check_username(self,field):

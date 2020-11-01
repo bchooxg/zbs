@@ -1,10 +1,11 @@
+from datetime import datetime
 from flask import Flask, render_template, url_for, request, redirect, flash, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_login import LoginManager, UserMixin
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from forms import RegistrationForm, CreateChannelForm, CreateSlotForm
+from forms import LoginForm, RegistrationForm, CreateChannelForm, CreateSlotForm
 
 login_manager = LoginManager()
 
@@ -41,6 +42,7 @@ class Slot(db.Model):
     start_time = db.Column(db.String(4))
     end_time = db.Column(db.String(4))
     channel_id = db.Column(db.Integer,db.ForeignKey('channel.id'))
+    bookings = db.relationship('Booking', backref='slot', lazy='dynamic')
 
     def __init__(self,start_time,end_time,channel_id):
         self.start_time = start_time
@@ -59,23 +61,39 @@ class User(db.Model, UserMixin):
     name = db.Column(db.String(64))
     username = db.Column(db.String(64),unique=True)
     hashed_pass =db.Column(db.String(128))
-    isStaff = db.Column(db.Boolean)
-    isStudent = db.Column(db.Boolean)
-    isAdmin = db.Column(db.Boolean)
+    type = db.Column(db.Integer())
+    bookings = db.relationship('Booking', backref='user',lazy='dynamic')
 
-    def __init__(self,name,username,password):
+
+    def __init__(self,name,username,password,type):
         self.name = name
         self.username = username
         self.hashed_pass = generate_password_hash(password)
+        self.type = type
     
     def check_password(self,password):
         return check_password_hash(self.hashed_pass,password)
+
+class Booking(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    channel_id = db.Column(db.Integer,db.ForeignKey('channel.id'))
+    slot_id = db.Column(db.Integer,db.ForeignKey('slot.id'))
+    user_id = db.Column(db.Integer,db.ForeignKey('user.id'))
+    date = db.Column(db.Date)
+
+    def __init__(self, channel_id, slot_id, user_id, date):
+        self.channel_id = channel_id
+        self.slot_id = slot_id
+        self.user_id = user_id
+        self.date = date
+    
+    def __repr__(self):
+        return f"Booking ID: {self.id} Channel ID: {self.channel_id} Slot ID: {self.slot_id} User ID: {self.user_id} Date: {self.date}"
 
 
 @app.route('/', methods=['POST','GET'])
 def index():
     create_channel_form = CreateChannelForm()
-
     channels = Channel.query.all()
     return render_template('index.html', channels=channels, create_channel_form=create_channel_form)
 
@@ -83,14 +101,51 @@ def index():
 
 @app.route('/login', methods=["POST","GET"])
 def login():
-    return render_template('login.html')  
+
+    form = LoginForm()
+
+    if form.validate_on_submit():
+        user = User.query.filter_by(username = form.username.data).first()
+
+        if user.check_password(form.password.data) and user is not None :
+            login_user(user)
+            flash("Logged In Successfully","success")
+
+            next = request.args.get('next')
+
+            if next == None or not next[0]=='/':
+                next = url_for('index')
+
+            return redirect(next)
+        else:
+            flash("Unable to login",'danger')
+            return redirect(url_for('login'))
+
+    return render_template('login.html',form=form)  
 
 @app.route('/register', methods=["POST","GET"])
 def register():
-
     form = RegistrationForm()
 
+    if form.validate_on_submit():
+        user = User(
+            name = form.name.data,
+            username = form.username.data,
+            password = form.password.data,
+            type = form.type.data)
+        db.session.add(user)
+        db.session.commit()
+        flash("Account has been created","success")
+        return redirect(url_for('index'))   
+
     return render_template('register.html',form=form)
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('You have been logged out','info')
+    return redirect(url_for('index'))
 
 
 
@@ -125,10 +180,58 @@ def slot_delete(id):
         db.session.delete(slot)
         db.session.commit()
         flash('Slot Deleted',"danger")
-        return redirect(url_for('channel',id=channel))
+        return (url_for('channel',id=channel))
     else:
         flash('Error Deleting Slot',"danger")
         return redirect(url_for('index'))
+
+
+# BOOKING ROUTES
+
+@app.route('/book',methods=['POST'])
+@login_required
+def book():
+
+    user_id = request.form['user_id']
+    channel_id = request.form['channel_id']
+    slot_id = request.form['slot_id']
+    date = datetime.strptime(request.form['date'], "%Y-%m-%d")
+
+    booking = Booking(user_id = user_id, channel_id = channel_id, slot_id = slot_id, date = date)
+    db.session.add(booking)
+    db.session.commit()
+
+    flash("Booking has been created","success")
+    return redirect(url_for('channel',id=channel_id))   
+
+@app.route('/bookings')
+@login_required
+def bookings():
+
+    user_id = current_user.id
+
+    all_bookings = Booking.query.filter_by(user_id=user_id).all()
+
+    return render_template('bookings.html', all_bookings=all_bookings)
+
+@app.route('/bookings/delete/<int:id>')
+@login_required
+def delete_booking(id):
+
+    user_id = current_user.id
+    booking = Booking.query.filter_by(id=id).first()
+
+    print(booking.user_id)
+
+
+    if booking is not None and booking.user_id == user_id:
+        db.session.delete(booking)
+        db.session.commit()
+        flash('Booking Has Been Deleted', "danger")
+        return redirect(url_for('bookings'))
+
+
+
 
 
 

@@ -19,20 +19,26 @@
 
 
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  <!-- Categories: success (green), info (blue), warning (yellow), danger (red) -->
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="container alert alert-{{ category }} alert-dismissible" role="alert">
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      <!-- <strong>Title</strong> --> {{ message }}
-      </div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
-
-
 <div class="container">
+
+  {% if current_user.is_authenticated %}
+  <p>Welcome {{ current_user.name }}</p>
+    {% if current_user.type == 0 %}
+    <p>User Administrator</p>
+
+    {% elif current_user.type == 1 %}
+    <p>Staff User</p>
+
+    {% elif current_user.type == 2 %}
+    <p>Student User</p>
+
+    {% endif %}
+  <a href="{{ url_for('logout') }}">Log Out</a>
+  {% else %}
+  <a href="{{ url_for('login') }}">Login</a>
+  <a href="{{ url_for('register') }}">Register</a>
+
+  {% endif %}
 
     <h1>Input New Channel Name</h1>
     <!-- <form action="{{ url_for('create_channel') }}" method='POST'>

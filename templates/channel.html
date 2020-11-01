@@ -7,23 +7,26 @@
 {% block body %}
 <div class="container">
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    <!-- Categories: success (green), info (blue), warning (yellow), danger (red) -->
-        {% if messages %}
-            {% for category, message in messages %}
-            <div class="container alert alert-{{ category }} alert-dismissible" role="alert">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <!-- <strong>Title</strong> --> {{ message }}
-            </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
     <h1>Channel Name : {{ channel.name }}</h1>
     <h3>Start Date : {{ channel.start_date }}</h3>
 
- 
+  
+    <!-- Student View  -->
+    <form method="POST" action="{{ url_for('book') }}">
+      <input type="hidden" name="user_id" value="{{ current_user.id }}" >
+      <input type="hidden" name="channel_id" value="{{ channel.id }}" >
+      <input val type="date" name="date" required>
+      <br>
+      {% for slot in channel.slots %}
+      <label for="checkbox{{ slot.id }}"> {{ slot }}     
+        <input type="radio" id="checkbox{{ slot.id }}" name="slot_id" value="{{ slot.id }}">
+      </label>
+      <br>
+      {% endfor %}
+      <input type="submit" value="Book">
+    </form>
 
+    <!-- Teacher View -->
     <table class="table table-hover">
         <thead>
           <tr>
@@ -57,7 +60,8 @@
 
         </tbody>
       </table>
-
+    
+    <h3>Add New Slot</h3>
     <form method="POST">
         {{ form.csrf_token }}
         {{ form.channel_id(value=channel.id) }}

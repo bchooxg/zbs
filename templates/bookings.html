@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block body %}
+
+<div class="container w-50 mt-5">
+
+  <h1>My Bookings</h1>
+
+  {% for booking in all_bookings %}
+    
+    {{ booking }}
+    <a href="{{ url_for('delete_booking',id=booking.id) }}">Delete</a>
+    <br>
+
+  {% endfor %}
+
+
+
+</div>
+
+{% endblock %}

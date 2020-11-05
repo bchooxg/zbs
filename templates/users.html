@@ -8,7 +8,10 @@
 
 <div class="container w-50 mt-5">
 
+
   <h1>All Users</h1>
+  <button><a href="{{url_for('register')}}">Create New Account</a></button>
+
 
   <table class="table table-hover">
     <thead>
@@ -19,6 +22,7 @@
         <th scope="col">User Type</th>
         <th scope="col">Last Logged In</th>
         <th scope="col">Last Logged Out</th>
+        <th scope="col">Delete Account</th>
       </tr>
     </thead>
     <tbody>
@@ -41,6 +45,7 @@
         {% else %}
         <td>Not Logged Out Yet</td>
         {% endif %}
+        <td><a href="{{ url_for('delete_user', id=user.id) }}">Delete</a></td>
       </tr>
       {% endfor %}
 

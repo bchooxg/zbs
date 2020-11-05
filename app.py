@@ -108,6 +108,24 @@ def users():
 
     return render_template('users.html',users = users)
 
+@app.route('/users/delete/<int:id>')
+def delete_user(id):
+
+    if current_user.type == 0 :
+
+        user = User.query.get(id)
+
+        if user is not None:
+            db.session.delete(user)
+            db.session.commit()
+            flash("Account has been deleted","success")
+            return redirect(url_for('users'))
+
+    flash('Deleting user accounts is restricted to User Adminstrators',"danger")
+    return redirect('index')
+
+
+
 @app.route('/login', methods=["POST","GET"])
 def login():
 

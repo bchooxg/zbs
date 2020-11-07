@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import Flask, render_template, url_for, request, redirect, flash, session
+from flask import Flask, render_template, url_for, request, redirect, flash, session, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -134,7 +134,11 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(username = form.username.data).first()
 
-        if user.check_password(form.password.data) and user is not None :
+        if user is None:
+            flash('Invalid Credentials',"danger")
+            return redirect(url_for('login'))
+
+        if user.check_password(form.password.data) :
             login_user(user)
             # Set last logged in date and time
             user.last_logged_in = datetime.now()
@@ -167,7 +171,7 @@ def register():
         db.session.add(user)
         db.session.commit()
         flash("Account has been created","success")
-        return redirect(url_for('index'))   
+        return redirect(url_for('users'))   
 
     return render_template('register.html',form=form)
 
@@ -266,9 +270,28 @@ def delete_booking(id):
         flash('Booking Has Been Deleted', "danger")
         return redirect(url_for('bookings'))
 
+@app.route('/api/getbookings', methods=['POST'])
+def getbookings():
 
+    req = request.get_json()
+    
+    date = req['date']
+    channel_id = req['channel_id']
 
+    bookings = Booking.query.filter_by(date = date, channel_id= channel_id).all()
+    
+    slots = []
 
+    for booking in bookings:
+        slots.append(booking.slot_id)
+    
+
+    res = make_response(jsonify({
+        "message": "OK",
+        "slots_taken" : slots
+        }), 200)
+
+    return res
 
 
 # CHANNEL ROUTES

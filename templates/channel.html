@@ -9,17 +9,18 @@
 
     <h1>Channel Name : {{ channel.name }}</h1>
     <h3>Start Date : {{ channel.start_date }}</h3>
+    <input type="hidden" id="c_start_date" value="{{ channel.start_date }}">
 
   
     <!-- Student View  -->
     <form method="POST" action="{{ url_for('book') }}">
       <input type="hidden" name="user_id" value="{{ current_user.id }}" >
-      <input type="hidden" name="channel_id" value="{{ channel.id }}" >
-      <input val type="date" name="date" required>
+      <input type="hidden" id="channel_id" name="channel_id" value="{{ channel.id }}" >
+      <input onchange="handler(event);" id="date" type="date" name="date" required>
       <br>
       {% for slot in channel.slots %}
       <label for="checkbox{{ slot.id }}"> {{ slot }}     
-        <input type="radio" id="checkbox{{ slot.id }}" name="slot_id" value="{{ slot.id }}">
+        <input class="radio" type="radio" id="checkbox{{ slot.id }}" name="slot_id" value="{{ slot.id }}">
       </label>
       <br>
       {% endfor %}
@@ -27,7 +28,6 @@
     </form>
 
     <!-- Teacher View -->
-    <button><a href="url_for('register')">Register</a></button>
     <table class="table table-hover">
         <thead>
           <tr>

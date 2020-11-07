@@ -13,6 +13,7 @@
     <h1>Channel Name : {{ channel.name }}</h1>
     <h3>Start Date : {{ channel.start_date }}</h3>
     <h3>Capacity : {{ channel.capacity }}</h3>
+    <input id="c_start_date" type="hidden" value="{{ channel.start_date }}">
 
     <form method="POST" action="{{ url_for('book') }}">
       <input type="hidden" name="user_id" value="{{ current_user.id }}" >
@@ -33,7 +34,7 @@
     <form action="{{ url_for('update_channel') }}" method="POST">
         <input type="hidden" name="channel_id" value="{{ channel.id }}">
         <h1>Channel Name : <input type="text" name='channel_name' value="{{ channel.name }}"></h1>
-        <h3>Start Date : <input type="date" name='start_date' id="c_start_date" type="text" value="{{ channel.start_date }}"></h3>
+        <h3>Start Date : <input type="date" name='start_date'  type="text" value="{{ channel.start_date }}"></h3>
         <h3>Capacity : <input type="text" name='capacity' value="{{ channel.capacity }}"></h3>
         <input class="btn btn-primary" type="submit" value="Update">
     </form>

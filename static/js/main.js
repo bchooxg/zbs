@@ -34,6 +34,7 @@ function handler(e){
             const startdate = new Date($("#c_start_date").val())
             // get input date
             const date = new Date($("#date").val())
+
             // if input date before start date
             if(startdate > date){
                 var x = document.getElementsByClassName("radio");

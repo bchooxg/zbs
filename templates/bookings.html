@@ -10,13 +10,34 @@
 
   <h1>My Bookings</h1>
 
-  {% for booking in all_bookings %}
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Channel</th>
+        <th scope="col">Slot</th>
+        <th scope="col">Manage</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for booking in all_bookings %}
+      <tr>
+        <th scope="row">{{ loop.index }}</th>
+        <td>{{ booking.channel.name }}</td>
+        <td>{{ booking.slot}}</td>
+        <td>
+          <a href="{{ url_for('delete_booking',id=booking.id) }}">Delete</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
     
     {{ booking }}
-    <a href="{{ url_for('delete_booking',id=booking.id) }}">Delete</a>
     <br>
 
-  {% endfor %}
 
 
 

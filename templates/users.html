@@ -29,10 +29,11 @@
 
       {% for user in users %}
       <tr>
-
+        <form id="user{{ user.id }}" action="{{ url_for('update_user') }}" method="POST"></form>
+        <input form="user{{ user.id }}" type="hidden" name="user_id" value="{{ user.id }}">
         <th scope="row">{{ user.id }}</th>
-        <td>{{ user.name }}</td>
-        <td>{{ user.username }}</td>            
+        <td><input form="user{{ user.id }}" name="name" type="text" value="{{ user.name }}"></td>
+        <td><input form="user{{ user.id }}" name="username" type="text" value="{{ user.username }}"></td>
         <td>
           {% if user.type == 0 %}
           User Administrator
@@ -53,7 +54,10 @@
         {% else %}
         <td>Not Logged Out Yet</td>
         {% endif %}
-        <td><a href="{{ url_for('delete_user', id=user.id) }}">Delete</a></td>
+        <td>
+          <a class="btn btn-danger" href="{{ url_for('delete_user', id=user.id) }}">Delete</a>
+          <input class="btn btn-primary" form="user{{ user.id }}" type="submit" value="Update" >
+        </td>
       </tr>
       {% endfor %}
 

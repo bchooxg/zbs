@@ -19,9 +19,9 @@
 
 
 
-<div class="container">
-
-    <h1>Input New Channel Name</h1>
+<div class="container mt-5">
+    {% if current_user.type == 1 %}
+    <h1>Create New Channel</h1>
     <!-- <form action="{{ url_for('create_channel') }}" method='POST'>
         <input required type="text" name="c_name" placeholder="Channel Name">
         <button type="submit">SUBMIT</button>
@@ -29,14 +29,18 @@
 
     <form action="{{ url_for('create_channel') }}" method="POST">
         {{ create_channel_form.hidden_tag() }}
-        {{ create_channel_form.name.label }}{{ create_channel_form.name() }}
-        {{ create_channel_form.date.label }}{{ create_channel_form.date() }}
+        {{ create_channel_form.name.label }} {{ create_channel_form.name() }}
+        <br>
+        {{ create_channel_form.date.label }} {{ create_channel_form.date() }}
+        <br>
+        {{ create_channel_form.capactiy.label }} {{ create_channel_form.capactiy() }}
+        <br>
         {{ create_channel_form.submit() }}
     </form>
+    {% endif %}
 
     {% for channel in channels %}
     <h1><a href="{{ url_for('channel', id=channel.id) }}">{{ channel.name }}</a></h1>
-    <a href="{{ url_for('delete_channel', id=channel.id) }}">Delete</a>
     {% endfor %}
 </div>
 {% endblock %}

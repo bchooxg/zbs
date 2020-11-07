@@ -21,14 +21,17 @@ Migrate(app,db,render_as_batch=True)
 
 login_manager.init_app(app)
 login_manager.login_view = "login"
+login_manager.login_message_category = 'danger'
 
 
 # DATABASES
 class Channel(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     name = db.Column(db.String(50))
+    capacity = db.Column(db.Integer)
     start_date = db.Column(db.Date)
-    slots = db.relationship('Slot', backref='channel',lazy='dynamic')
+    slots = db.relationship('Slot', backref='channel')
+    bookings = db.relationship('Booking', backref='channel')
 
     def __init__(self, name, start_date):
         self.name = name
@@ -42,7 +45,7 @@ class Slot(db.Model):
     start_time = db.Column(db.String(4))
     end_time = db.Column(db.String(4))
     channel_id = db.Column(db.Integer,db.ForeignKey('channel.id'))
-    bookings = db.relationship('Booking', backref='slot', lazy='dynamic')
+    bookings = db.relationship('Booking', backref='slot')
 
     def __init__(self,start_time,end_time,channel_id):
         self.start_time = start_time
@@ -62,7 +65,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(64),unique=True)
     hashed_pass =db.Column(db.String(128))
     type = db.Column(db.Integer())
-    bookings = db.relationship('Booking', backref='user',lazy='dynamic')
+    bookings = db.relationship('Booking',cascade='all,delete', backref='user',lazy='dynamic')
     last_logged_in = db.Column(db.DateTime)
     last_logged_out = db.Column(db.DateTime)
 
@@ -94,6 +97,7 @@ class Booking(db.Model):
 
 
 @app.route('/', methods=['POST','GET'])
+@login_required
 def index():
     create_channel_form = CreateChannelForm()
     channels = Channel.query.all()
@@ -103,10 +107,12 @@ def index():
 
 @app.route('/users')
 def users():
-
-    users = User.query.all()
-
-    return render_template('users.html',users = users)
+    if current_user.type == 0 :
+        users = User.query.all()
+        return render_template('users.html',users = users)
+    else:
+        flash('Only User Administrators are allowed to access this page')
+        return redirect(url_for('index'))
 
 @app.route('/users/delete/<int:id>')
 def delete_user(id):
@@ -123,6 +129,23 @@ def delete_user(id):
 
     flash('Deleting user accounts is restricted to User Adminstrators',"danger")
     return redirect('index')
+
+@app.route('/users/update', methods=['POST'])
+def update_user():
+    id = request.form['user_id']
+    name = request.form['name']
+    username = request.form['username']
+
+    user = User.query.filter_by(id=id).first()
+
+    if user is None :
+        return redirect(url_for('users'))
+    
+    user.name = name 
+    user.username = username
+    db.session.commit()
+    flash('User details Updated',"success")
+    return redirect(url_for('users'))
 
 
 
@@ -185,7 +208,7 @@ def logout():
     logout_user()
 
     flash('You have been logged out','info')
-    return redirect(url_for('index'))
+    return redirect(url_for('login'))
 
 
 
@@ -261,9 +284,6 @@ def delete_booking(id):
     user_id = current_user.id
     booking = Booking.query.filter_by(id=id).first()
 
-    print(booking.user_id)
-
-
     if booking is not None and booking.user_id == user_id:
         db.session.delete(booking)
         db.session.commit()
@@ -274,7 +294,7 @@ def delete_booking(id):
 def getbookings():
 
     req = request.get_json()
-    
+
     date = req['date']
     channel_id = req['channel_id']
 
@@ -332,7 +352,8 @@ def create_channel():
     if form.validate_on_submit():
         channel_name = form.name.data
         start_date = form.date.data
-        new_channel = Channel(name=channel_name, start_date=start_date)
+        capacity = form.data.capacity
+        new_channel = Channel(name=channel_name, start_date=start_date,capacity=capacity)
 
         try:
             db.session.add(new_channel)
@@ -346,6 +367,28 @@ def create_channel():
     else:
         flash("Failed to create channel","danger")
         return redirect(url_for('index'))
+
+@app.route('/update_channel', methods=['POST'])
+def update_channel():
+    channel_id = request.form['channel_id']
+
+    channel = Channel.query.filter_by(id=channel_id).first()
+
+    if channel == None:
+        return redirect(url_for('channel',id=channel_id))
+
+    channel_name= request.form['channel_name']
+    start_date = datetime.strptime(request.form['start_date'], "%Y-%m-%d")
+    capacity= request.form['capacity']
+
+    channel.channel_name = channel_name
+    channel.start_date = start_date
+    channel.capacity = capacity 
+    db.session.commit()
+    flash("Channel Details Updated","success")
+    return redirect(url_for('channel',id=channel_id))
+
+
 
 @app.route('/delete_channel/<int:id>')
 def delete_channel(id):

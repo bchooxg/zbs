@@ -28,7 +28,7 @@ class RegistrationForm(FlaskForm):
 class CreateChannelForm(FlaskForm):
     name = StringField('Desired Channel Name',validators=[DataRequired()])
     date = DateField('Channel Start Date', format='%Y-%m-%d',validators=[DataRequired()])
-    capactiy = StringField('Attendee Capacity',validators=[DataRequired()])
+    capacity = StringField('Attendee Capacity',validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 class CreateSlotForm(FlaskForm):

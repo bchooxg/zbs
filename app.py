@@ -33,9 +33,10 @@ class Channel(db.Model):
     slots = db.relationship('Slot', backref='channel')
     bookings = db.relationship('Booking', backref='channel')
 
-    def __init__(self, name, start_date):
+    def __init__(self, name, start_date,capacity):
         self.name = name
         self.start_date = start_date
+        self.capacity = capacity
 
     def __repr__(self):
         return '<Task %r>'% self.id
@@ -352,7 +353,7 @@ def create_channel():
     if form.validate_on_submit():
         channel_name = form.name.data
         start_date = form.date.data
-        capacity = form.data.capacity
+        capacity = form.capacity.data
         new_channel = Channel(name=channel_name, start_date=start_date,capacity=capacity)
 
         try:
@@ -381,7 +382,7 @@ def update_channel():
     start_date = datetime.strptime(request.form['start_date'], "%Y-%m-%d")
     capacity= request.form['capacity']
 
-    channel.channel_name = channel_name
+    channel.name = channel_name
     channel.start_date = start_date
     channel.capacity = capacity 
     db.session.commit()

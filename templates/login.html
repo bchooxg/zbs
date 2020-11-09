@@ -12,8 +12,9 @@
 
   <form method="POST">
     {{ form.hidden_tag() }}
-    {{ form.username.label }}{{ form.username() }}
-    {{ form.password.label }}{{ form.password() }}
+    {{ form.username.label }} {{ form.username() }}
+    <br>
+    {{ form.password.label }} {{ form.password() }}
     {{ form.submit() }}
   </form>
 

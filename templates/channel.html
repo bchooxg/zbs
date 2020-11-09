@@ -34,10 +34,12 @@
     <form action="{{ url_for('update_channel') }}" method="POST">
         <input type="hidden" name="channel_id" value="{{ channel.id }}">
         <h1>Channel Name : <input type="text" name='channel_name' value="{{ channel.name }}"></h1>
-        <h3>Start Date : <input type="date" name='start_date'  type="text" value="{{ channel.start_date }}"></h3>
+        <h3>Start Date : <input type="date" name='start_date' value="{{ channel.start_date }}"></h3>
         <h3>Capacity : <input type="text" name='capacity' value="{{ channel.capacity }}"></h3>
         <input class="btn btn-primary" type="submit" value="Update">
     </form>
+    <br>
+    <a class="btn btn-danger" href="{{ url_for('delete_channel', id=channel.id) }}">Delete</a>
 
     <table class="table table-hover">
         <thead>

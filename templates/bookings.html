@@ -15,6 +15,7 @@
       <tr>
         <th scope="col">#</th>
         <th scope="col">Channel</th>
+        <th scope="col">Date</th>
         <th scope="col">Slot</th>
         <th scope="col">Manage</th>
       </tr>
@@ -25,6 +26,7 @@
       <tr>
         <th scope="row">{{ loop.index }}</th>
         <td>{{ booking.channel.name }}</td>
+        <td>{{ booking.date }}</td>
         <td>{{ booking.slot}}</td>
         <td>
           <a href="{{ url_for('delete_booking',id=booking.id) }}">Delete</a>

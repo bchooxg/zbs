@@ -24,12 +24,43 @@
     <tbody>
       {% for booking in all_bookings %}
       <tr>
-        <th scope="row">{{ loop.index }}</th>
-        <td>{{ booking.channel.name }}</td>
-        <td>{{ booking.date }}</td>
-        <td>{{ booking.slot}}</td>
+        <th scope="row">
+          {{ loop.index }}
+          <input hidden id="booking_id{{booking.id}}" type="text" value="{{ booking.id }}">
+        </th>
+        <td>
+          <!-- {{ booking.channel.name }} -->
+          <select onchange="handler({{ booking.id }});" id="channel{{ booking.id }}" class="form-control">
+            {% for channel in channels %}
+            
+            <option value="{{ channel.id }}"
+            {% if channel.name == booking.channel.name %}
+            selected
+            {% endif %}
+            >{{ channel.name }}</option>
+            {% endfor %}
+          </select>
+        </td>
+        <td><input onchange="handler({{ booking.id }});" id="date{{ booking.id }}" type="date" value="{{ booking.date }}">
+        </td>
+        <td>
+          <select class="form-control" id="slot{{booking.id}}">
+            {% for channel in channels %}
+              {% if channel.name == booking.channel.name %}
+                {% for slot in channel.slots %}
+                <option value="{{ slot.id }}"
+                  {% if booking.slot_id == slot.id  %}
+                  selected
+                  {% endif %}
+                >{{ slot }}</option>
+                {% endfor %}
+              {% endif %}
+            {% endfor %}
+          </select>
+        </td>
         <td>
           <a href="{{ url_for('delete_booking',id=booking.id) }}">Delete</a>
+          <a href="#"> Update </a>
         </td>
       </tr>
       {% endfor %}
@@ -44,5 +75,6 @@
 
 
 </div>
+<script src="{{url_for('static', filename='js/booking.js')}}"></script>
 
 {% endblock %}

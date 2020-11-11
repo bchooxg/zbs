@@ -274,9 +274,10 @@ def bookings():
 
     user_id = current_user.id
 
+    channels = Channel.query.all()
     all_bookings = Booking.query.filter_by(user_id=user_id).all()
 
-    return render_template('bookings.html', all_bookings=all_bookings)
+    return render_template('bookings.html',channels=channels , all_bookings=all_bookings)
 
 @app.route('/bookings/delete/<int:id>')
 @login_required
@@ -300,6 +301,15 @@ def getbookings():
     channel_id = req['channel_id']
 
     bookings = Booking.query.filter_by(date = date, channel_id= channel_id).all()
+    total_slots = Channel.query.filter_by(id=channel_id).first().slots
+
+    all_slots = []
+
+    for slot in total_slots:
+        all_slots.append({
+            "slot_id": slot.id,
+            "desc": str(slot)
+        })
     
     slots = []
 
@@ -309,7 +319,8 @@ def getbookings():
 
     res = make_response(jsonify({
         "message": "OK",
-        "slots_taken" : slots
+        "slots_taken" : slots,
+        "all_slots": all_slots
         }), 200)
 
     return res

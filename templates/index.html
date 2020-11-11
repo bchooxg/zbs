@@ -37,10 +37,21 @@
         <br>
         {{ create_channel_form.submit() }}
     </form>
+    <br>
     {% endif %}
 
+    <div class="card-group">
     {% for channel in channels %}
-    <h1><a href="{{ url_for('channel', id=channel.id) }}">{{ channel.name }}</a></h1>
+
+    <div class="card" style="width: 18rem;">
+        <div class="card-body">
+          <h5 class="card-title">{{ channel.name }}</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Start Date : {{ channel.start_date }}</h6>
+          <h6 class="card-subtitle mb-2 text-muted">Capacity : {{ channel.capacity }}</h6>
+          <a href="{{ url_for('channel', id=channel.id) }}" class="card-link">View Slots</a>
+        </div>
+    </div>
     {% endfor %}
+    </div>
 </div>
 {% endblock %}

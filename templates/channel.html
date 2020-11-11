@@ -31,6 +31,7 @@
 
     {% elif current_user.type == 1 %}
     <!-- Teacher View -->
+  
     <form action="{{ url_for('update_channel') }}" method="POST">
         <input type="hidden" name="channel_id" value="{{ channel.id }}">
         <h1>Channel Name : <input type="text" name='channel_name' value="{{ channel.name }}"></h1>
@@ -39,7 +40,7 @@
         <input class="btn btn-primary" type="submit" value="Update">
     </form>
     <br>
-    <a class="btn btn-danger" href="{{ url_for('delete_channel', id=channel.id) }}">Delete</a>
+    <a class="btn btn-danger" href="{{ url_for('delete_channel', id=channel.id) }}">Delete This Channel</a>
 
     <table class="table table-hover">
         <thead>
@@ -83,6 +84,8 @@
         {{ form.end_time.label }}{{ form.end_time() }}
         {{ form.submit() }}
     </form>
+    {% elif current_user.type == 0 %}
+    <h1>Administrators are not allowed to access channel details</h1>
     {% endif %}
 </div>
 {% endblock %}

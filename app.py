@@ -292,6 +292,28 @@ def delete_booking(id):
         flash('Booking Has Been Deleted', "danger")
         return redirect(url_for('bookings'))
 
+@app.route('/bookings/update',methods=['POST']) 
+def booking_update():
+
+    booking_id = request.form['booking_id']
+    slot_id = request.form["slot_id"]
+    channel_id = request.form["channel_id"]
+    date = request.form["date"]
+    date = datetime.strptime(request.form['date'], "%Y-%m-%d")
+    booking = Booking.query.filter_by(id=booking_id).first()
+
+    if booking is not None :
+        booking.slot_id = slot_id
+        booking.channel_id = channel_id
+        booking.date = date
+        
+        db.session.commit()
+        flash('Booking Updated',"success")
+        return redirect(url_for("bookings"))
+    else:
+        print('Booking Not Found')
+        return redirect('/')
+
 @app.route('/api/getbookings', methods=['POST'])
 def getbookings():
 
@@ -416,6 +438,7 @@ def delete_channel(id):
         return redirect('/')
 
     new_channel = Channel(name=channel_name)
+
 
 if __name__ == "__main__":
     app.run(debug=True)

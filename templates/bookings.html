@@ -23,14 +23,15 @@
 
     <tbody>
       {% for booking in all_bookings %}
+      <form id="form{{ booking.id }}" action="{{ url_for('booking_update') }}" method="POST"></form>
       <tr>
         <th scope="row">
           {{ loop.index }}
-          <input hidden id="booking_id{{booking.id}}" type="text" value="{{ booking.id }}">
+          <input form="form{{ booking.id }}" name="booking_id" hidden id="booking_id{{booking.id}}" type="text" value="{{ booking.id }}">
         </th>
         <td>
           <!-- {{ booking.channel.name }} -->
-          <select onchange="handler({{ booking.id }});" id="channel{{ booking.id }}" class="form-control">
+          <select form="form{{ booking.id }}" name="channel_id" onchange="handler({{ booking.id }});" id="channel{{ booking.id }}" class="form-control">
             {% for channel in channels %}
             
             <option value="{{ channel.id }}"
@@ -41,10 +42,10 @@
             {% endfor %}
           </select>
         </td>
-        <td><input onchange="handler({{ booking.id }});" id="date{{ booking.id }}" type="date" value="{{ booking.date }}">
+        <td><input form="form{{ booking.id }}" name="date" onchange="handler({{ booking.id }});" id="date{{ booking.id }}" type="date" value="{{ booking.date }}">
         </td>
         <td>
-          <select class="form-control" id="slot{{booking.id}}">
+          <select name="slot_id" form="form{{ booking.id }}" class="form-control" id="slot{{booking.id}}">
             {% for channel in channels %}
               {% if channel.name == booking.channel.name %}
                 {% for slot in channel.slots %}
@@ -59,8 +60,8 @@
           </select>
         </td>
         <td>
-          <a href="{{ url_for('delete_booking',id=booking.id) }}">Delete</a>
-          <a href="#"> Update </a>
+          <a class="btn btn-danger" href="{{ url_for('delete_booking',id=booking.id) }}">Delete</a>
+          <input class="btn btn-primary" form="form{{ booking.id }}" type="submit" value="Update">
         </td>
       </tr>
       {% endfor %}
